@@ -2,8 +2,10 @@ import numpy as np
 import matlab.engine
 from sim_shower_env import SimulinkShowerEnv
 
-# Pfad zum Ordner mit build_shower_control.m
-MATLAB_SCRIPT_DIR = r"C:\Users\lukelo_g\devWORK\RL\shower\matlab"
+
+MATLAB_SCRIPT_DIR = "/home/lukelo-tshakulongo/Bakoko/Nkulu/Computer Science/Code/Musualu/simulink_python_shower/matlab"
+
+
 
 def build_model_in_matlab(init_state: int):
     """Erzeugt (oder überschreibt) shower_control.slx mit gegebenem Startwert."""

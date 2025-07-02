@@ -1,10 +1,12 @@
 import matlab.engine
 import numpy as np
-from gym import Env, spaces
+from gymnasium import Env, spaces
 import os
 
 # Pfad zum Ordner, in dem shower_control.slx liegt
-MATLAB_MODEL_DIR = r"C:\Users\lukelo_g\devWORK\RL\shower\matlab\models"
+MATLAB_MODEL_DIR = "/home/lukelo-tshakulongo/Bakoko/Nkulu/Computer Science/Code/Musualu/simulink_python_shower/matlab/models"
+
+
 
 class SimulinkShowerEnv(Env):
     """Gym-Wrapper für das Shower-Control Simulink-Modell."""
