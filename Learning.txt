@@ -1,0 +1,66 @@
+
+
+Simulink-Engine ist CPU-basiert
+– Standard-Simulink führt jeden Zeitschritt sequentiell auf der CPU aus.
+– Eine NVIDIA-GPU wird dabei nicht genutzt.
+
+
+
+GPU-Coder nötig für echten GPU-Offload
+– Mit der GPU Coder Toolbox kannst du ausgewählte Modell-Blöcke in CUDA-Code übersetzen und per MEX auf der GPU laufen lassen.
+– Das erfordert
+
+    Lizenz für GPU Coder,
+
+    Modell-Anpassung auf unterstützte Blöcke,
+
+    einen Build-Schritt („Generate GPU Code“ → Kompilieren → Einbinden).
+    – Dann kann ein Teil der Berechnungen auf der GPU beschleunigt werden, aber die Einarbeitung und Setup-Kosten sind nicht unerheblich.
+
+
+Parallel Computing Toolbox für Multi-Core-Speed-Up
+– Ohne GPU Coder kannst du mit der Parallel Computing Toolbox mehrere Simulationsläufe (z. B. für Parameter-Sweeps oder RL-Rollouts) parallel auf verschiedene CPU-Worker verteilen.
+– Das ist in der Regel deutlich einfacher und liefert in vielen Fällen mehr Gesamtperformance als jeder GPU-Trick.
+
+
+Empfehlung für RL-Workflows
+
+    GPU: Setze sie ein, um dein Neuronales Netz (Policy, Value-Funktion) mit PyTorch/TensorFlow/JAX zu trainieren.
+
+    CPU-Parallelisierung: Nutze in MATLAB die Parallel Computing Toolbox (mit parsim, parpool) oder in Python SubprocVecEnv, um mehrere Sim-Instanzen gleichzeitig laufen zu lassen.
+    
+    
+______________________________________________________________________________________________________________________________
+
+
+1. Leichtgewichtige Python-Reimplementierung (Proof-of-Concept)
+
+    Pure-Python-/NumPy-Port
+    Überführe die Kern-Gleichungen (z.B. Euler-Update deiner Temperaturdynamik) aus Simulink in reines Python mit NumPy oder sogar PyTorch.
+    – Jeder env.step() läuft dann in <1 ms statt 50–200 ms
+    – Nutzt GPU-Batching für riesige Speed-Ups bei Netz-Updates
+
+    Stable-Baselines3 + DummyVecEnv
+    Trainingsloop komplett in Python, GPU nur für Policy-Updates, keine MATLAB-Overhead
+
+2. Mittlere Skalierung mit automatischem Code-Export
+
+    Simulink Coder → C/C++ → Python
+    Generiere aus deinem Modell nativen C-Code (grt.tlc), kompiliere als Shared Lib und binde mit ctypes/SWIG ein.
+
+    FMI-Export → FMU → PyFMI/FMPy
+    Exportiere dein Modell als FMU und simuliere es in Python-Tools, dann verteile über Ray RLlib:
+    – Ray RLlib orchestriert hunderte FMU-Instanzen auf CPU-Cluster
+    – Einfachere Integration, standardisiertes Format
+
+3. Enterprise-Level mit GPU-Native Simulation
+
+    NVIDIA Isaac Gym / PhysX CUDA
+    Baue dein Modell neu in Isaac Gym auf (CUDA-Kernel), so dass tausende Rollouts komplett auf der GPU laufen.
+
+    Verteiltes Training
+    – Ray RLlib oder Horovod + PyTorch DDP für Multi-GPU/Multi-Node
+    – Kubernetes/Docker/SLURM zur Orchestrierung von Hunderten von GPU-Instanzen
+
+    Parallel Computing Toolbox (falls du doch in MATLAB bleiben musst)
+    Starte viele Simulationsläufe per parsim auf mehreren CPU-Worker-Kernen
